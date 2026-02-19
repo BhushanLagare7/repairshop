@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 
 const LoginPage = () => {
   return (
-    <main className="flex flex-col gap-6 items-center p-4 text-4xl h-dvh">
-      <h1>Repair Shop</h1>
+    <main className="flex flex-col gap-6 items-center p-4 h-dvh">
+      <h1 className="text-4xl">Computer Repair Shop</h1>
       <Button asChild>
         <LoginLink>Sign In</LoginLink>
       </Button>
