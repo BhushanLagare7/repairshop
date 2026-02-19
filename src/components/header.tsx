@@ -11,7 +11,7 @@ export const Header = () => {
         <div className="flex gap-2 items-center">
           <NavButton href="/home" icon={HomeIcon} label="Home" />
           <Link
-            className="flex gap-2 justify-center items-center m-0 ml-0"
+            className="flex gap-2 justify-center items-center m-0"
             href="/home"
           >
             <h1 className="hidden text-xl font-bold sm:block">

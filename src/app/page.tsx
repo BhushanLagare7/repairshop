@@ -6,7 +6,7 @@ export default function Home() {
       <main className="flex flex-col justify-center mx-auto max-w-5xl text-center h-dvh">
         <div className="flex flex-col gap-6 p-12 mx-auto w-4/5 text-white rounded-xl bg-black/90 sm:max-w-96 sm:text-2xl">
           <h1 className="text-4xl font-bold">
-            Dan&apos;s Computer <br />
+            Bob&apos;s Computer <br />
             Repair Shop
           </h1>
           <address>

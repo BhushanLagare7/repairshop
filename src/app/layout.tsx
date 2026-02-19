@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     template: "%s | Computer Repair Shop",
     default: "Computer Repair Shop",
   },
-  description: "Dan's Computer Repair Shop",
+  description: "Bob's Computer Repair Shop",
   applicationName: "Repair Shop",
 };
 
