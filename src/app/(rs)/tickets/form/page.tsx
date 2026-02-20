@@ -26,13 +26,16 @@ const TicketFormPage = async ({
   let ticket = null;
 
   if (customerId) {
+    const id = parseInt(customerId, 10);
+    if (Number.isNaN(id)) throw new Error("Invalid customerId");
+
     try {
-      customer = await getCustomer(parseInt(customerId));
+      customer = await getCustomer(id);
     } catch (error) {
-      if (error instanceof Error) {
-        Sentry.captureException(error);
-        throw new Error(error.message);
-      }
+      Sentry.captureException(
+        error instanceof Error ? error : new Error(String(error)),
+      );
+      throw error;
     }
 
     if (!customer) {
@@ -56,17 +59,19 @@ const TicketFormPage = async ({
     }
 
     // Put Ticket Form component
-    console.log(customer);
   }
 
   if (ticketId) {
+    const id = parseInt(ticketId, 10);
+    if (Number.isNaN(id)) throw new Error("Invalid ticketId");
+
     try {
-      ticket = await getTicket(parseInt(ticketId));
+      ticket = await getTicket(id);
     } catch (error) {
-      Sentry.captureException(error);
-      if (error instanceof Error) {
-        throw new Error(error.message);
-      }
+      Sentry.captureException(
+        error instanceof Error ? error : new Error(String(error)),
+      );
+      throw error;
     }
 
     if (!ticket) {
@@ -82,15 +87,24 @@ const TicketFormPage = async ({
     try {
       ticketCustomer = await getCustomer(ticket.customerId);
     } catch (error) {
-      if (error instanceof Error) {
-        Sentry.captureException(error);
-        throw new Error(error.message);
-      }
+      Sentry.captureException(
+        error instanceof Error ? error : new Error(String(error)),
+      );
+      throw error;
+    }
+
+    if (!ticketCustomer) {
+      return (
+        <>
+          <h2 className="mb-2 text-2xl">
+            Customer for Ticket Id #{ticketId} not found
+          </h2>
+          <BackButton title="Go Back" variant="default" />
+        </>
+      );
     }
 
     // Put Ticket Form component
-    console.log("ticket:", ticket);
-    console.log("ticketCustomer:", ticketCustomer);
   }
 
   return <div></div>;

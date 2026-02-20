@@ -32,8 +32,8 @@ export const BackButton = ({
       className={className}
       title={title}
       variant={variant}
-      onClick={() => router.back()}
       {...props}
+      onClick={() => router.back()}
     >
       {title}
     </Button>

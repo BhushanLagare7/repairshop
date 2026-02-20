@@ -13,13 +13,16 @@ const CustomerFormPage = async ({
   let customer = null;
 
   if (customerId) {
+    const id = parseInt(customerId, 10);
+    if (Number.isNaN(id)) throw new Error("Invalid customerId");
+
     try {
-      customer = await getCustomer(parseInt(customerId));
+      customer = await getCustomer(id);
     } catch (error) {
-      if (error instanceof Error) {
-        Sentry.captureException(error);
-        throw new Error(error.message);
-      }
+      Sentry.captureException(
+        error instanceof Error ? error : new Error(String(error)),
+      );
+      throw error;
     }
 
     if (!customer) {
