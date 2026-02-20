@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
 
+import { TicketForm } from "@/app/(rs)/tickets/form/ticket-form";
 import { BackButton } from "@/components/back-button";
 import { getCustomer } from "@/lib/queries/getCustomer";
 import { getTicket } from "@/lib/queries/getTicket";
@@ -22,92 +23,76 @@ const TicketFormPage = async ({
     );
   }
 
-  let customer = null;
-  let ticket = null;
+  try {
+    if (customerId) {
+      const id = parseInt(customerId, 10);
+      if (Number.isNaN(id)) throw new Error("Invalid customerId");
 
-  if (customerId) {
-    const id = parseInt(customerId, 10);
-    if (Number.isNaN(id)) throw new Error("Invalid customerId");
+      const customer = await getCustomer(id);
 
-    try {
-      customer = await getCustomer(id);
-    } catch (error) {
-      Sentry.captureException(
-        error instanceof Error ? error : new Error(String(error)),
-      );
-      throw error;
+      if (!customer) {
+        return (
+          <>
+            <h2 className="mb-2 text-2xl">
+              Customer Id #{customerId} not found
+            </h2>
+            <BackButton title="Go Back" variant="default" />
+          </>
+        );
+      }
+
+      if (!customer.active) {
+        return (
+          <>
+            <h2 className="mb-2 text-2xl">
+              Customer Id #{customerId} is not active
+            </h2>
+            <BackButton title="Go Back" variant="default" />
+          </>
+        );
+      }
+
+      // return form for new ticket
+      return <TicketForm customer={customer} />;
     }
 
-    if (!customer) {
-      return (
-        <>
-          <h2 className="mb-2 text-2xl">Customer Id #{customerId} not found</h2>
-          <BackButton title="Go Back" variant="default" />
-        </>
-      );
-    }
+    if (ticketId) {
+      const id = parseInt(ticketId, 10);
+      if (Number.isNaN(id)) throw new Error("Invalid ticketId");
 
-    if (!customer.active) {
-      return (
-        <>
-          <h2 className="mb-2 text-2xl">
-            Customer Id #{customerId} is not active
-          </h2>
-          <BackButton title="Go Back" variant="default" />
-        </>
-      );
-    }
+      const ticket = await getTicket(id);
 
-    // Put Ticket Form component
+      if (!ticket) {
+        return (
+          <>
+            <h2 className="mb-2 text-2xl">Ticket Id #{ticketId} not found</h2>
+            <BackButton title="Go Back" variant="default" />
+          </>
+        );
+      }
+
+      const customer = await getCustomer(ticket.customerId);
+
+      if (!customer) {
+        return (
+          <>
+            <h2 className="mb-2 text-2xl">
+              Customer for Ticket Id #{ticketId} not found
+            </h2>
+            <BackButton title="Go Back" variant="default" />
+          </>
+        );
+      }
+
+      // return form to edit ticket
+      return <TicketForm customer={customer} ticket={ticket} />;
+    }
+  } catch (error) {
+    Sentry.captureException(
+      error instanceof Error ? error : new Error(String(error)),
+    );
+    throw error;
   }
-
-  if (ticketId) {
-    const id = parseInt(ticketId, 10);
-    if (Number.isNaN(id)) throw new Error("Invalid ticketId");
-
-    try {
-      ticket = await getTicket(id);
-    } catch (error) {
-      Sentry.captureException(
-        error instanceof Error ? error : new Error(String(error)),
-      );
-      throw error;
-    }
-
-    if (!ticket) {
-      return (
-        <>
-          <h2 className="mb-2 text-2xl">Ticket Id #{ticketId} not found</h2>
-          <BackButton title="Go Back" variant="default" />
-        </>
-      );
-    }
-
-    let ticketCustomer = null;
-    try {
-      ticketCustomer = await getCustomer(ticket.customerId);
-    } catch (error) {
-      Sentry.captureException(
-        error instanceof Error ? error : new Error(String(error)),
-      );
-      throw error;
-    }
-
-    if (!ticketCustomer) {
-      return (
-        <>
-          <h2 className="mb-2 text-2xl">
-            Customer for Ticket Id #{ticketId} not found
-          </h2>
-          <BackButton title="Go Back" variant="default" />
-        </>
-      );
-    }
-
-    // Put Ticket Form component
-  }
-
-  return <div></div>;
 };
 
 export default TicketFormPage;
