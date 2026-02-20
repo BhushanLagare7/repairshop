@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
 
+import { CustomerForm } from "@/app/(rs)/customers/form/customer-form";
 import { BackButton } from "@/components/back-button";
 import { getCustomer } from "@/lib/queries/getCustomer";
 
@@ -8,36 +9,36 @@ const CustomerFormPage = async ({
 }: {
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) => {
-  const { customerId } = await searchParams;
+  try {
+    const { customerId } = await searchParams;
 
-  let customer = null;
+    if (customerId) {
+      const id = parseInt(customerId, 10);
+      if (Number.isNaN(id)) throw new Error("Invalid customerId");
 
-  if (customerId) {
-    const id = parseInt(customerId, 10);
-    if (Number.isNaN(id)) throw new Error("Invalid customerId");
+      const customer = await getCustomer(id);
 
-    try {
-      customer = await getCustomer(id);
-    } catch (error) {
-      Sentry.captureException(
-        error instanceof Error ? error : new Error(String(error)),
-      );
-      throw error;
+      if (!customer) {
+        return (
+          <>
+            <h2 className="mb-2 text-2xl">
+              Customer Id #{customerId} not found
+            </h2>
+            <BackButton title="Go Back" variant="default" />
+          </>
+        );
+      }
+
+      return <CustomerForm customer={customer} />;
+    } else {
+      return <CustomerForm />;
     }
-
-    if (!customer) {
-      return (
-        <>
-          <h2 className="mb-2 text-2xl">Customer Id #{customerId} not found</h2>
-          <BackButton title="Go Back" variant="default" />
-        </>
-      );
-    }
-  } else {
-    // Put Customer Form component
+  } catch (error) {
+    Sentry.captureException(
+      error instanceof Error ? error : new Error(String(error)),
+    );
+    throw error;
   }
-
-  return <div></div>;
 };
 
 export default CustomerFormPage;
