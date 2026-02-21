@@ -3,6 +3,10 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { CheckboxWithLabel } from "@/components/inputs/checkbox-with-label";
+import { InputWithLabel } from "@/components/inputs/input-with-label";
+import { TextareaWithLabel } from "@/components/inputs/textarea-with-label";
+import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { type selectCustomerSchemaType } from "@/zod-schemas/customer";
 import {
@@ -45,10 +49,60 @@ export const TicketForm = ({ customer, ticket }: TicketFormProps) => {
       </div>
       <Form {...form}>
         <form
-          className="flex flex-col sm:flex-row gap-4 sm:gap-8"
+          className="flex flex-col gap-4 md:flex-row md:gap-8"
           onSubmit={form.handleSubmit(onSubmit)}
         >
-          <p>{JSON.stringify(form.getValues(), null, 2)}</p>
+          <div className="flex flex-col gap-4 w-full max-w-xs">
+            <InputWithLabel<insertTicketSchemaType>
+              fieldTitle="Title"
+              nameInSchema="title"
+            />
+            <InputWithLabel<insertTicketSchemaType>
+              disabled
+              fieldTitle="Tech"
+              nameInSchema="tech"
+            />
+            <CheckboxWithLabel<insertTicketSchemaType>
+              fieldTitle="Completed"
+              message="Yes"
+              nameInSchema="completed"
+            />
+            <div className="mt-4 space-y-2">
+              <h3 className="text-lg">Customer Info</h3>
+              <hr className="w-4/5" />
+              <p>
+                {customer.firstName} {customer.lastName}
+              </p>
+              <p>{customer.address1}</p>
+              {customer.address2 && <p>{customer.address2}</p>}
+              <p>
+                {customer.city}, {customer.state} {customer.zip}
+              </p>
+              <hr className="w-4/5" />
+              <p>{customer.email}</p>
+              <p>Phone: {customer.phone}</p>
+            </div>
+          </div>
+          <div className="flex flex-col gap-4 w-full max-w-xs">
+            <TextareaWithLabel<insertTicketSchemaType>
+              className="h-96"
+              fieldTitle="Description"
+              nameInSchema="description"
+            />
+            <div className="flex gap-2">
+              <Button className="w-3/4" title="Save" type="submit">
+                Save
+              </Button>
+              <Button
+                title="Reset"
+                type="button"
+                variant="destructive"
+                onClick={() => form.reset(defaultValues)}
+              >
+                Reset
+              </Button>
+            </div>
+          </div>
         </form>
       </Form>
     </div>
