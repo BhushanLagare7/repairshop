@@ -3,7 +3,12 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { InputWithLabel } from "@/components/inputs/input-with-label";
+import { SelectWithLabel } from "@/components/inputs/select-with-label";
+import { TextareaWithLabel } from "@/components/inputs/textarea-with-label";
+import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
+import { StatesArray } from "@/constants/states-array";
 import {
   insertCustomerSchema,
   type insertCustomerSchemaType,
@@ -48,10 +53,68 @@ export const CustomerForm = ({ customer }: CustomerFormProps) => {
       </div>
       <Form {...form}>
         <form
-          className="flex flex-col sm:flex-row gap-4 sm:gap-8"
+          className="flex flex-col gap-4 md:flex-row md:gap-8"
           onSubmit={form.handleSubmit(onSubmit)}
         >
-          <p>{JSON.stringify(form.getValues(), null, 2)}</p>
+          <div className="flex flex-col gap-4 w-full max-w-xs">
+            <InputWithLabel<insertCustomerSchemaType>
+              fieldTitle="First Name"
+              nameInSchema="firstName"
+            />
+            <InputWithLabel<insertCustomerSchemaType>
+              fieldTitle="Last Name"
+              nameInSchema="lastName"
+            />
+            <InputWithLabel<insertCustomerSchemaType>
+              fieldTitle="Address 1"
+              nameInSchema="address1"
+            />
+            <InputWithLabel<insertCustomerSchemaType>
+              fieldTitle="Address 2"
+              nameInSchema="address2"
+            />
+            <InputWithLabel<insertCustomerSchemaType>
+              fieldTitle="City"
+              nameInSchema="city"
+            />
+            <SelectWithLabel<insertCustomerSchemaType>
+              data={StatesArray}
+              fieldTitle="State"
+              nameInSchema="state"
+            />
+          </div>
+          <div className="flex flex-col gap-4 w-full max-w-xs">
+            <InputWithLabel<insertCustomerSchemaType>
+              fieldTitle="Zip Code"
+              nameInSchema="zip"
+            />
+            <InputWithLabel<insertCustomerSchemaType>
+              fieldTitle="Email"
+              nameInSchema="email"
+            />
+            <InputWithLabel<insertCustomerSchemaType>
+              fieldTitle="Phone"
+              nameInSchema="phone"
+            />
+            <TextareaWithLabel<insertCustomerSchemaType>
+              className="h-40"
+              fieldTitle="Notes"
+              nameInSchema="notes"
+            />
+            <div className="flex gap-2">
+              <Button className="w-3/4" title="Save" type="submit">
+                Save
+              </Button>
+              <Button
+                title="Reset"
+                type="button"
+                variant="destructive"
+                onClick={() => form.reset(defaultValues)}
+              >
+                Reset
+              </Button>
+            </div>
+          </div>
         </form>
       </Form>
     </div>
