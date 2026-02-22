@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { CheckboxWithLabel } from "@/components/inputs/checkbox-with-label";
 import { InputWithLabel } from "@/components/inputs/input-with-label";
+import { SelectWithLabel } from "@/components/inputs/select-with-label";
 import { TextareaWithLabel } from "@/components/inputs/textarea-with-label";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
@@ -18,9 +19,18 @@ import {
 type TicketFormProps = {
   customer: selectCustomerSchemaType;
   ticket?: selectTicketSchemaType;
+  techs?: { id: string; description: string }[];
+  isEditable?: boolean;
 };
 
-export const TicketForm = ({ customer, ticket }: TicketFormProps) => {
+export const TicketForm = ({
+  customer,
+  ticket,
+  techs,
+  isEditable = true,
+}: TicketFormProps) => {
+  const isManager = Array.isArray(techs);
+
   const defaultValues: insertTicketSchemaType = {
     id: ticket?.id ?? "(New)",
     customerId: ticket?.customerId ?? customer.id,
@@ -44,7 +54,11 @@ export const TicketForm = ({ customer, ticket }: TicketFormProps) => {
     <div className="flex flex-col gap-1 sm:px-8">
       <div>
         <h2 className="text-2xl font-bold">
-          {ticket?.id ? `Edit Ticket #${ticket.id}` : "New Ticket Form"}
+          {ticket?.id && isEditable
+            ? `Edit Ticket #${ticket.id}`
+            : ticket?.id
+              ? `View Ticket #${ticket.id}`
+              : "New Ticket Form"}
         </h2>
       </div>
       <Form {...form}>
@@ -54,19 +68,37 @@ export const TicketForm = ({ customer, ticket }: TicketFormProps) => {
         >
           <div className="flex flex-col gap-4 w-full max-w-xs">
             <InputWithLabel<insertTicketSchemaType>
+              disabled={!isEditable}
               fieldTitle="Title"
               nameInSchema="title"
             />
-            <InputWithLabel<insertTicketSchemaType>
-              disabled
-              fieldTitle="Tech"
-              nameInSchema="tech"
-            />
-            <CheckboxWithLabel<insertTicketSchemaType>
-              fieldTitle="Completed"
-              message="Yes"
-              nameInSchema="completed"
-            />
+            {isManager ? (
+              <SelectWithLabel<insertTicketSchemaType>
+                data={[
+                  {
+                    id: "new-ticket@example.com",
+                    description: "new-ticket@example.com",
+                  },
+                  ...techs,
+                ]}
+                fieldTitle="Tech ID"
+                nameInSchema="tech"
+              />
+            ) : (
+              <InputWithLabel<insertTicketSchemaType>
+                disabled
+                fieldTitle="Tech"
+                nameInSchema="tech"
+              />
+            )}
+            {!!ticket?.id && (
+              <CheckboxWithLabel<insertTicketSchemaType>
+                disabled={!isEditable}
+                fieldTitle="Completed"
+                message="Yes"
+                nameInSchema="completed"
+              />
+            )}
             <div className="mt-4 space-y-2">
               <h3 className="text-lg">Customer Info</h3>
               <hr className="w-4/5" />
@@ -86,22 +118,25 @@ export const TicketForm = ({ customer, ticket }: TicketFormProps) => {
           <div className="flex flex-col gap-4 w-full max-w-xs">
             <TextareaWithLabel<insertTicketSchemaType>
               className="h-96"
+              disabled={!isEditable}
               fieldTitle="Description"
               nameInSchema="description"
             />
-            <div className="flex gap-2">
-              <Button className="w-3/4" title="Save" type="submit">
-                Save
-              </Button>
-              <Button
-                title="Reset"
-                type="button"
-                variant="destructive"
-                onClick={() => form.reset(defaultValues)}
-              >
-                Reset
-              </Button>
-            </div>
+            {isEditable && (
+              <div className="flex gap-2">
+                <Button className="w-3/4" title="Save" type="submit">
+                  Save
+                </Button>
+                <Button
+                  title="Reset"
+                  type="button"
+                  variant="destructive"
+                  onClick={() => form.reset(defaultValues)}
+                >
+                  Reset
+                </Button>
+              </div>
+            )}
           </div>
         </form>
       </Form>
