@@ -1,8 +1,28 @@
+import type { Metadata } from "next";
 import * as Sentry from "@sentry/nextjs";
 
 import { CustomerForm } from "@/app/(rs)/customers/form/customer-form";
 import { BackButton } from "@/components/back-button";
 import { getCustomer } from "@/lib/queries/getCustomer";
+
+export const generateMetadata = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | undefined }>;
+}): Promise<Metadata> => {
+  const { customerId } = await searchParams;
+
+  if (!customerId) return { title: "New Customer" };
+
+  const id = parseInt(customerId, 10);
+  if (Number.isNaN(id)) throw new Error("Invalid customerId");
+
+  const customer = await getCustomer(id);
+
+  if (!customer) return { title: "Customer Not Found" };
+
+  return { title: `Edit Customer #${customerId}` };
+};
 
 const CustomerFormPage = async ({
   searchParams,

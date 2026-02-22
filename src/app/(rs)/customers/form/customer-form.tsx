@@ -2,7 +2,9 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 
+import { CheckboxWithLabel } from "@/components/inputs/checkbox-with-label";
 import { InputWithLabel } from "@/components/inputs/input-with-label";
 import { SelectWithLabel } from "@/components/inputs/select-with-label";
 import { TextareaWithLabel } from "@/components/inputs/textarea-with-label";
@@ -20,6 +22,10 @@ type CustomerFormProps = {
 };
 
 export const CustomerForm = ({ customer }: CustomerFormProps) => {
+  const { getPermission, isLoading } = useKindeBrowserClient();
+
+  const isManager = !isLoading && getPermission("manager")?.isGranted;
+
   const defaultValues: insertCustomerSchemaType = {
     id: customer?.id ?? 0,
     firstName: customer?.firstName ?? "",
@@ -32,6 +38,7 @@ export const CustomerForm = ({ customer }: CustomerFormProps) => {
     state: customer?.state ?? "",
     zip: customer?.zip ?? "",
     notes: customer?.notes ?? "",
+    active: customer?.active ?? true,
   };
 
   const form = useForm<insertCustomerSchemaType>({
@@ -48,7 +55,7 @@ export const CustomerForm = ({ customer }: CustomerFormProps) => {
     <div className="flex flex-col gap-1 sm:px-8">
       <div>
         <h2 className="text-2xl font-bold">
-          {customer?.id ? "Edit" : "New"} Customer Form
+          {customer?.id ? `Edit Customer #${customer.id}` : "New Customer Form"}
         </h2>
       </div>
       <Form {...form}>
@@ -101,6 +108,18 @@ export const CustomerForm = ({ customer }: CustomerFormProps) => {
               fieldTitle="Notes"
               nameInSchema="notes"
             />
+            {isLoading ? (
+              <p>Loading...</p>
+            ) : (
+              isManager &&
+              customer?.id && (
+                <CheckboxWithLabel<insertCustomerSchemaType>
+                  fieldTitle="Active"
+                  message="Yes"
+                  nameInSchema="active"
+                />
+              )
+            )}
             <div className="flex gap-2">
               <Button className="w-3/4" title="Save" type="submit">
                 Save
