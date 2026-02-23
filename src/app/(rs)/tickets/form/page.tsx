@@ -5,8 +5,8 @@ import * as Sentry from "@sentry/nextjs";
 
 import { TicketForm } from "@/app/(rs)/tickets/form/ticket-form";
 import { BackButton } from "@/components/back-button";
-import { getCustomer } from "@/lib/queries/getCustomer";
-import { getTicket } from "@/lib/queries/getTicket";
+import { getCustomer } from "@/lib/queries/get-customer";
+import { getTicket } from "@/lib/queries/get-ticket";
 
 export const generateMetadata = async ({
   searchParams,

@@ -3,7 +3,7 @@ import * as Sentry from "@sentry/nextjs";
 
 import { CustomerForm } from "@/app/(rs)/customers/form/customer-form";
 import { BackButton } from "@/components/back-button";
-import { getCustomer } from "@/lib/queries/getCustomer";
+import { getCustomer } from "@/lib/queries/get-customer";
 
 export const generateMetadata = async ({
   searchParams,

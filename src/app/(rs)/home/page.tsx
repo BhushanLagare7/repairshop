@@ -1,11 +1,7 @@
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Home",
-};
+import { redirect } from "next/navigation";
 
 const HomePage = () => {
-  return <div>HomePage</div>;
+  redirect("/tickets");
 };
 
 export default HomePage;
