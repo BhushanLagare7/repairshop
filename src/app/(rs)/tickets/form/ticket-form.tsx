@@ -1,8 +1,13 @@
 "use client";
 
 import { useForm } from "react-hook-form";
+import { useAction } from "next-safe-action/hooks";
+import { LoaderCircle } from "lucide-react";
+import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { saveTicketAction } from "@/app/actions/save-ticket-action";
+import { DisplayServerActionResponse } from "@/components/display-server-action-response";
 import { CheckboxWithLabel } from "@/components/inputs/checkbox-with-label";
 import { InputWithLabel } from "@/components/inputs/input-with-label";
 import { SelectWithLabel } from "@/components/inputs/select-with-label";
@@ -46,12 +51,31 @@ export const TicketForm = ({
     defaultValues,
   });
 
+  const {
+    execute: executeSave,
+    reset: resetSave,
+    result: resultSave,
+    isPending: isSaving,
+  } = useAction(saveTicketAction, {
+    onSuccess: ({ data }) => {
+      toast.success("Success! 🎉", {
+        description: data?.message,
+      });
+    },
+    onError: () => {
+      toast.error("Error! 🚨", {
+        description: "Something went wrong. Please try again.",
+      });
+    },
+  });
+
   const onSubmit = (values: insertTicketSchemaType) => {
-    console.log(values);
+    executeSave(values);
   };
 
   return (
     <div className="flex flex-col gap-1 sm:px-8">
+      <DisplayServerActionResponse result={resultSave} />
       <div>
         <h2 className="text-2xl font-bold">
           {ticket?.id && isEditable
@@ -124,14 +148,30 @@ export const TicketForm = ({
             />
             {isEditable && (
               <div className="flex gap-2">
-                <Button className="w-3/4" title="Save" type="submit">
-                  Save
+                <Button
+                  className="w-3/4"
+                  disabled={isSaving}
+                  title="Save"
+                  type="submit"
+                >
+                  {isSaving ? (
+                    <>
+                      <LoaderCircle className="animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save"
+                  )}
                 </Button>
                 <Button
+                  disabled={isSaving}
                   title="Reset"
                   type="button"
                   variant="destructive"
-                  onClick={() => form.reset(defaultValues)}
+                  onClick={() => {
+                    form.reset(defaultValues);
+                    resetSave();
+                  }}
                 >
                   Reset
                 </Button>
