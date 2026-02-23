@@ -13,6 +13,8 @@ import { ModeToggle } from "@/components/mode-toggle";
 import { NavButton } from "@/components/nav-button";
 import { Button } from "@/components/ui/button";
 
+import { NavButtonMenu } from "./nav-button-menu";
+
 export const Header = async () => {
   const { isAuthenticated } = getKindeServerSession();
   const isUserAuthenticated = await isAuthenticated();
@@ -32,11 +34,21 @@ export const Header = async () => {
           </Link>
         </div>
         <div className="flex items-center">
-          <NavButton href="/tickets" icon={FileIcon} label="Tickets" />
-          <NavButton
-            href="/customers"
+          <NavButtonMenu
+            choices={[
+              { title: "Search Customers", href: "/customers" },
+              { title: "New Customer", href: "/customers/form" },
+            ]}
             icon={UsersRoundIcon}
             label="Customers"
+          />
+          <NavButtonMenu
+            choices={[
+              { title: "Search Tickets", href: "/tickets" },
+              { title: "New Ticket", href: "/tickets/form" },
+            ]}
+            icon={FileIcon}
+            label="Tickets"
           />
           <ModeToggle />
           {isUserAuthenticated ? (
