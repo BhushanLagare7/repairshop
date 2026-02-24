@@ -181,9 +181,16 @@ export const TicketTable = ({ data }: Props) => {
               <TableRow
                 key={row.id}
                 className="cursor-pointer hover:bg-border/25 dark:hover:bg-ring/40"
+                tabIndex={0}
                 onClick={() =>
                   router.push(`/tickets/form?ticketId=${row.original.id}`)
                 }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    router.push(`/tickets/form?ticketId=${row.original.id}`);
+                  }
+                }}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id} className="border">
