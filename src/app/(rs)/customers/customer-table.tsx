@@ -39,7 +39,12 @@ export const CustomerTable = ({ data }: CustomerTableProps) => {
   const columns = columnHeadersArray.map((columnName) =>
     columnHelper.accessor(columnName, {
       id: columnName,
-      header: columnName[0].toUpperCase() + columnName.slice(1),
+      header: columnName
+        .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+        .replace(/^./, (str) => str.toUpperCase())
+        .split(" ")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" "),
     }),
   );
 
@@ -75,9 +80,16 @@ export const CustomerTable = ({ data }: CustomerTableProps) => {
             <TableRow
               key={row.id}
               className="cursor-pointer hover:bg-border/25 dark:hover:bg-ring/40"
+              tabIndex={0}
               onClick={() =>
                 router.push(`/customers/form?customerId=${row.original.id}`)
               }
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  router.push(`/customers/form?customerId=${row.original.id}`);
+                }
+              }}
             >
               {row.getVisibleCells().map((cell) => (
                 <TableCell key={cell.id} className="border">
