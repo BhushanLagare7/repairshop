@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { TicketSearch } from "@/app/(rs)/tickets/ticket-search";
+import { TicketTable } from "@/app/(rs)/tickets/ticket-table";
 import { getOpenTickets } from "@/lib/queries/get-open-tickets";
 import { getTicketSearchResults } from "@/lib/queries/get-ticket-search-results";
 
@@ -20,7 +21,13 @@ const TicketsPage = async ({
     return (
       <>
         <TicketSearch />
-        <pre>{JSON.stringify(openTickets, null, 2)}</pre>
+        {openTickets.length > 0 ? (
+          <TicketTable data={openTickets} />
+        ) : (
+          <p className="mt-6 text-center text-muted-foreground">
+            No open tickets found
+          </p>
+        )}
       </>
     );
   }
@@ -30,7 +37,13 @@ const TicketsPage = async ({
   return (
     <>
       <TicketSearch />
-      <pre>{JSON.stringify(tickets, null, 2)}</pre>
+      {tickets.length > 0 ? (
+        <TicketTable data={tickets} />
+      ) : (
+        <p className="mt-6 text-center text-muted-foreground">
+          No tickets found
+        </p>
+      )}
     </>
   );
 };

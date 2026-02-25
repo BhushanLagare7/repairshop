@@ -40,14 +40,20 @@ export const CustomerTable = ({ data }: CustomerTableProps) => {
     columnHelper.accessor(columnName, {
       id: columnName,
       header: columnName
+        // Convert camelCase to space separated words
         .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+        // Capitalize first letter
         .replace(/^./, (str) => str.toUpperCase())
+        // Split by space and capitalize each word
         .split(" ")
+        // Capitalize first letter of each word
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        // Join by space
         .join(" "),
     }),
   );
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- As we do not use react compiler
   const table = useReactTable({
     data,
     columns,

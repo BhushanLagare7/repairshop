@@ -42,7 +42,7 @@ export const TicketForm = ({
     title: ticket?.title ?? "",
     description: ticket?.description ?? "",
     completed: ticket?.completed ?? false,
-    tech: ticket?.tech ?? "new-ticket@example.com",
+    tech: ticket?.tech?.toLowerCase() ?? "new-ticket@example.com",
   };
 
   const form = useForm<insertTicketSchemaType>({
