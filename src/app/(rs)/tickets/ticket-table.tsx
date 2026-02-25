@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowDownIcon,
   ArrowUpDownIcon,
@@ -32,6 +32,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { usePolling } from "@/hooks/use-polling";
 import type { TicketSearchResultType } from "@/lib/queries/get-ticket-search-results";
 
 type Props = {
@@ -42,6 +43,8 @@ type RowType = TicketSearchResultType;
 
 export const TicketTable = ({ data }: Props) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pageParam = searchParams.get("page");
 
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>([
@@ -50,6 +53,16 @@ export const TicketTable = ({ data }: Props) => {
       desc: false, // false for ascending
     },
   ]);
+
+  usePolling({
+    searchParam: searchParams.get("searchText"),
+    ms: 300_000,
+  });
+
+  const pageIndex = useMemo(() => {
+    const parsed = Number(pageParam);
+    return pageParam && Number.isInteger(parsed) && parsed > 0 ? parsed - 1 : 0;
+  }, [pageParam]);
 
   const columnHeadersArray: Array<keyof RowType> = [
     "ticketDate",
@@ -60,6 +73,14 @@ export const TicketTable = ({ data }: Props) => {
     "email",
     "completed",
   ];
+
+  const columnWidth = {
+    completed: 150,
+    ticketDate: 150,
+    title: 250,
+    tech: 225,
+    email: 225,
+  };
 
   const columnHelper = createColumnHelper<RowType>();
 
@@ -82,6 +103,7 @@ export const TicketTable = ({ data }: Props) => {
       },
       {
         id: columnName,
+        size: columnWidth[columnName as keyof typeof columnWidth] ?? undefined,
         header: ({ column }) => {
           return (
             <Button
@@ -138,16 +160,14 @@ export const TicketTable = ({ data }: Props) => {
     );
   });
 
-  // eslint-disable-next-line react-hooks/incompatible-library -- As we do not use react compiler
   const table = useReactTable({
     columns,
     data,
     state: {
       columnFilters,
       sorting,
-    },
-    initialState: {
       pagination: {
+        pageIndex,
         pageSize: 10,
       },
     },
@@ -160,6 +180,27 @@ export const TicketTable = ({ data }: Props) => {
     onSortingChange: setSorting,
   });
 
+  const handlePageChange = (newPage: number) => {
+    table.setPageIndex(newPage);
+    const params = new URLSearchParams(searchParams?.toString());
+    params.set("page", (newPage + 1).toString());
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
+
+  useEffect(() => {
+    // If the user filters out the last page, redirect to the last page
+    const currentPageIndex = table.getState().pagination.pageIndex;
+    const pageCount = table.getPageCount();
+    // If the last page is filtered out, redirect to the last page
+    if (pageCount <= currentPageIndex && currentPageIndex > 0) {
+      const params = new URLSearchParams(searchParams?.toString());
+      // Set page to 1
+      params.set("page", "1");
+      router.replace(`?${params.toString()}`, { scroll: false });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [table.getState().columnFilters]);
+
   return (
     <div className="flex flex-col gap-4 mt-6">
       <div className="overflow-hidden rounded-lg border border-border">
@@ -168,7 +209,11 @@ export const TicketTable = ({ data }: Props) => {
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="p-1 bg-secondary">
+                  <TableHead
+                    key={header.id}
+                    className="p-1 bg-secondary"
+                    style={{ width: header.getSize() }}
+                  >
                     <div>
                       {header.isPlaceholder
                         ? null
@@ -179,7 +224,12 @@ export const TicketTable = ({ data }: Props) => {
                     </div>
                     {header.column.getCanFilter() ? (
                       <div className="grid place-content-center">
-                        <Filter column={header.column} />
+                        <Filter
+                          column={header.column}
+                          filteredRows={table
+                            .getFilteredRowModel()
+                            .rows.map((row) => row.getValue(header.column.id))}
+                        />
                       </div>
                     ) : null}
                   </TableHead>
@@ -213,35 +263,49 @@ export const TicketTable = ({ data }: Props) => {
           </TableBody>
         </Table>
       </div>
-      <div className="flex justify-between items-center">
-        <div className="flex items-center basis-1/3">
+      <div className="flex flex-wrap gap-1 justify-between items-center">
+        <div>
           <p className="font-bold whitespace-nowrap">
-            {`Page ${table.getState().pagination.pageIndex + 1} of ${table.getPageCount()}`}
+            {`Page ${table.getState().pagination.pageIndex + 1} of ${Math.max(table.getPageCount(), 1)}`}
             &nbsp;&nbsp;
             {`[${table.getFilteredRowModel().rows.length} ${table.getFilteredRowModel().rows.length !== 1 ? "total results" : "result"}]`}
           </p>
         </div>
-        <div className="space-x-1">
-          <Button variant="outline" onClick={() => table.resetSorting()}>
-            Reset Sorting
-          </Button>
-          <Button variant="outline" onClick={() => table.resetColumnFilters()}>
-            Reset Filters
-          </Button>
-          <Button
-            disabled={!table.getCanPreviousPage()}
-            variant="outline"
-            onClick={() => table.previousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            disabled={!table.getCanNextPage()}
-            variant="outline"
-            onClick={() => table.nextPage()}
-          >
-            Next
-          </Button>
+        <div className="flex flex-row gap-1">
+          <div className="flex flex-row gap-1">
+            <Button variant="outline" onClick={() => router.refresh()}>
+              Refresh Data
+            </Button>
+            <Button variant="outline" onClick={() => table.resetSorting()}>
+              Reset Sorting
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => table.resetColumnFilters()}
+            >
+              Reset Filters
+            </Button>
+          </div>
+          <div className="flex flex-row gap-1">
+            <Button
+              disabled={!table.getCanPreviousPage()}
+              variant="outline"
+              onClick={() =>
+                handlePageChange(table.getState().pagination.pageIndex - 1)
+              }
+            >
+              Previous
+            </Button>
+            <Button
+              disabled={!table.getCanNextPage()}
+              variant="outline"
+              onClick={() =>
+                handlePageChange(table.getState().pagination.pageIndex + 1)
+              }
+            >
+              Next
+            </Button>
+          </div>
         </div>
       </div>
     </div>

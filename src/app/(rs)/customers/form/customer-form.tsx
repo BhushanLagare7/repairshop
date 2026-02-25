@@ -1,11 +1,12 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useSearchParams } from "next/navigation";
 import { useAction } from "next-safe-action/hooks";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 
 import { saveCustomerAction } from "@/app/actions/save-customer-action";
 import { DisplayServerActionResponse } from "@/components/display-server-action-response";
@@ -24,33 +25,59 @@ import {
 
 type CustomerFormProps = {
   customer?: selectCustomerSchemaType;
+  isManager?: boolean | undefined;
 };
 
-export const CustomerForm = ({ customer }: CustomerFormProps) => {
-  const { getPermission, isLoading } = useKindeBrowserClient();
+export const CustomerForm = ({
+  customer,
+  isManager = false,
+}: CustomerFormProps) => {
+  const searchParams = useSearchParams();
+  const hasCustomerId = searchParams.has("customerId");
+  const customerId = searchParams.get("customerId");
 
-  const isManager = !isLoading && getPermission("manager")?.isGranted;
-
-  const defaultValues: insertCustomerSchemaType = {
-    id: customer?.id ?? 0,
-    firstName: customer?.firstName ?? "",
-    lastName: customer?.lastName ?? "",
-    email: customer?.email ?? "",
-    phone: customer?.phone ?? "",
-    address1: customer?.address1 ?? "",
-    address2: customer?.address2 ?? "",
-    city: customer?.city ?? "",
-    state: customer?.state ?? "",
-    zip: customer?.zip ?? "",
-    notes: customer?.notes ?? "",
-    active: customer?.active ?? true,
+  const emptyValues: insertCustomerSchemaType = {
+    id: 0,
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address1: "",
+    address2: "",
+    city: "",
+    state: "",
+    zip: "",
+    notes: "",
+    active: true,
   };
+
+  const defaultValues: insertCustomerSchemaType = hasCustomerId
+    ? {
+        id: customer?.id ?? 0,
+        firstName: customer?.firstName ?? "",
+        lastName: customer?.lastName ?? "",
+        email: customer?.email ?? "",
+        phone: customer?.phone ?? "",
+        address1: customer?.address1 ?? "",
+        address2: customer?.address2 ?? "",
+        city: customer?.city ?? "",
+        state: customer?.state ?? "",
+        zip: customer?.zip ?? "",
+        notes: customer?.notes ?? "",
+        active: customer?.active ?? true,
+      }
+    : emptyValues;
 
   const form = useForm<insertCustomerSchemaType>({
     mode: "onBlur",
     resolver: zodResolver(insertCustomerSchema),
     defaultValues,
   });
+
+  useEffect(() => {
+    form.reset(hasCustomerId ? defaultValues : emptyValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- We only need customerId
+  }, [customerId]);
 
   const {
     execute: executeSave,
@@ -134,17 +161,12 @@ export const CustomerForm = ({ customer }: CustomerFormProps) => {
               fieldTitle="Notes"
               nameInSchema="notes"
             />
-            {isLoading ? (
-              <p>Loading...</p>
-            ) : (
-              isManager &&
-              customer?.id && (
-                <CheckboxWithLabel<insertCustomerSchemaType>
-                  fieldTitle="Active"
-                  message="Yes"
-                  nameInSchema="active"
-                />
-              )
+            {isManager && customer?.id && (
+              <CheckboxWithLabel<insertCustomerSchemaType>
+                fieldTitle="Active"
+                message="Yes"
+                nameInSchema="active"
+              />
             )}
             <div className="flex gap-2">
               <Button

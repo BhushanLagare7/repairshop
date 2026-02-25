@@ -26,6 +26,7 @@ type TicketFormProps = {
   ticket?: selectTicketSchemaType;
   techs?: { id: string; description: string }[];
   isEditable?: boolean;
+  isManager?: boolean | undefined;
 };
 
 export const TicketForm = ({
@@ -33,9 +34,8 @@ export const TicketForm = ({
   ticket,
   techs,
   isEditable = true,
+  isManager = false,
 }: TicketFormProps) => {
-  const isManager = Array.isArray(techs);
-
   const defaultValues: insertTicketSchemaType = {
     id: ticket?.id ?? "(New)",
     customerId: ticket?.customerId ?? customer.id,
@@ -96,7 +96,7 @@ export const TicketForm = ({
               fieldTitle="Title"
               nameInSchema="title"
             />
-            {isManager ? (
+            {isManager && techs ? (
               <SelectWithLabel<insertTicketSchemaType>
                 data={[
                   {
