@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import * as Sentry from "@sentry/nextjs";
 
 import { CustomerForm } from "@/app/(rs)/customers/form/customer-form";
@@ -30,6 +31,10 @@ const CustomerFormPage = async ({
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) => {
   try {
+    const { getPermission } = getKindeServerSession();
+    const managerPermission = await getPermission("manager");
+    const isManager = managerPermission?.isGranted;
+
     const { customerId } = await searchParams;
 
     if (customerId) {
@@ -49,9 +54,15 @@ const CustomerFormPage = async ({
         );
       }
 
-      return <CustomerForm customer={customer} />;
+      return (
+        <CustomerForm
+          key={customerId}
+          customer={customer}
+          isManager={isManager}
+        />
+      );
     } else {
-      return <CustomerForm />;
+      return <CustomerForm key={customerId} isManager={isManager} />;
     }
   } catch (error) {
     Sentry.captureException(

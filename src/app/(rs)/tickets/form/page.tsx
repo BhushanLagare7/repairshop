@@ -114,11 +114,16 @@ const TicketFormPage = async ({
 
         const techs = users
           ? users
-              .filter((u) => u.email)
-              .map((u) => ({ id: u.email!, description: u.email! }))
+              .filter((u): u is typeof u & { email: string } => !!u.email)
+              .map((u) => ({
+                id: u.email.toLowerCase(),
+                description: u.email.toLowerCase(),
+              }))
           : [];
 
-        return <TicketForm customer={customer} techs={techs} />;
+        return (
+          <TicketForm customer={customer} isManager={isManager} techs={techs} />
+        );
       } else {
         return <TicketForm customer={customer} />;
       }
@@ -157,10 +162,22 @@ const TicketFormPage = async ({
         const { users } = await Users.getUsers();
 
         const techs = users
-          ? users.map((u) => ({ id: u.email!, description: u.email! }))
+          ? users
+              .filter((u): u is typeof u & { email: string } => !!u.email)
+              .map((u) => ({
+                id: u.email.toLowerCase(),
+                description: u.email.toLowerCase(),
+              }))
           : [];
 
-        return <TicketForm customer={customer} techs={techs} ticket={ticket} />;
+        return (
+          <TicketForm
+            customer={customer}
+            isManager={isManager}
+            techs={techs}
+            ticket={ticket}
+          />
+        );
       } else {
         const isEditable =
           user?.email?.toLowerCase() === ticket.tech?.toLowerCase();

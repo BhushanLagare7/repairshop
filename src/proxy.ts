@@ -18,7 +18,9 @@ export const config = {
      * - images
      * - login
      * - homepage (represented with $ after beginning /)
+     * - Or paths ending with common image file extensions:
+     * - .png, .jpg, .jpeg, .gif, .svg, .ico, .webp
      */
-    "/((?!api|_next/static|_next/image|auth|favicon.ico|robots.txt|images|login|$).*)",
+    "/((?!api|_next/static|_next/image|auth|favicon.ico|robots.txt|images|login|$|.*\\.(?:png|jpg|jpeg|gif|svg|ico|webp)$).*)",
   ],
 };

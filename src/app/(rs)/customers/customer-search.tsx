@@ -7,6 +7,7 @@ export const CustomerSearch = () => {
   return (
     <Form action="/customers" className="flex gap-2 items-center">
       <Input
+        autoFocus
         className="w-full"
         name="searchText"
         placeholder="Search customers..."

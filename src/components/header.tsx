@@ -23,10 +23,10 @@ export const Header = async () => {
     <header className="sticky top-0 z-20 p-2 h-12 border-b animate-slide bg-background">
       <div className="flex justify-between items-center w-full h-8">
         <div className="flex gap-2 items-center">
-          <NavButton href="/home" icon={HomeIcon} label="Home" />
+          <NavButton href="/tickets" icon={HomeIcon} label="Home" />
           <Link
             className="flex gap-2 justify-center items-center m-0"
-            href="/home"
+            href="/tickets"
           >
             <h1 className="hidden text-xl font-bold sm:block">
               Computer Repair Shop
@@ -34,6 +34,14 @@ export const Header = async () => {
           </Link>
         </div>
         <div className="flex items-center">
+          <Link
+            aria-label="Tickets"
+            className="flex gap-2 justify-center items-center m-0"
+            href="/tickets"
+            title="Tickets"
+          >
+            <FileIcon />
+          </Link>
           <NavButtonMenu
             choices={[
               { title: "Search Customers", href: "/customers" },
@@ -41,14 +49,6 @@ export const Header = async () => {
             ]}
             icon={UsersRoundIcon}
             label="Customers"
-          />
-          <NavButtonMenu
-            choices={[
-              { title: "Search Tickets", href: "/tickets" },
-              { title: "New Ticket", href: "/tickets/form" },
-            ]}
-            icon={FileIcon}
-            label="Tickets"
           />
           <ModeToggle />
           {isUserAuthenticated ? (
