@@ -2,7 +2,9 @@ import { config } from "dotenv";
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
 
-config({ path: ".env.local" });
+if (process.env.NODE_ENV === "development") {
+  config({ path: ".env.local" });
+}
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {

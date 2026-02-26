@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { MoreHorizontalIcon, TableOfContentsIcon } from "lucide-react";
 import {
   CellContext,
@@ -36,8 +35,6 @@ type CustomerTableProps = {
 };
 
 export const CustomerTable = ({ data }: CustomerTableProps) => {
-  const router = useRouter();
-
   const columnHeadersArray: Array<keyof selectCustomerSchemaType> = [
     "firstName",
     "lastName",
