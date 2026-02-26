@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { Button } from "@/components/ui/button";
+
 export default function Home() {
   return (
     <div className="bg-black bg-center bg-cover bg-home-img">
@@ -18,6 +20,9 @@ export default function Home() {
           <Link className="hover:underline" href="tel:5555555555">
             555-555-5555
           </Link>
+          <Button asChild>
+            <Link href="/login">Login</Link>
+          </Button>
         </div>
       </main>
     </div>
